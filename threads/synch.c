@@ -205,13 +205,14 @@ void lock_acquire(struct lock *lock)
 	 * priority donation을 수행하도록 수정
 	 */
 	struct thread*t = thread_current();
-	
-	if (lock->holder!=NULL){
-		t->wait_on_lock = lock;
+	if (thread_mlfqs == false){
+		if (lock->holder!=NULL){
+			t->wait_on_lock = lock;
 
-		if (lock->holder->priority < t->priority){
-			list_push_back(&(lock->holder->donations), &t->d_elem);
-			donate_priority();
+			if (lock->holder->priority < t->priority){
+				list_push_back(&(lock->holder->donations), &t->d_elem);
+				donate_priority();
+			}
 		}
 	}
 	
@@ -257,8 +258,10 @@ void lock_release(struct lock *lock)
 	ASSERT(lock != NULL);
 	ASSERT(lock_held_by_current_thread(lock));
 
-	remove_with_lock(lock);
-	refresh_priority();
+	if (thread_mlfqs == false){
+		remove_with_lock(lock);
+		refresh_priority();
+	}
 	
 	lock->holder = NULL;
 	sema_up(&lock->semaphore);

@@ -98,6 +98,9 @@ struct thread
 	struct lock *wait_on_lock; /* 해당 스레드가 대기하고있는 lock자료구조의 주소를 저장 */
 	struct list donations;	   /* 해당 스레드가 우선순위는 낮으나 lock을 보유하고 있을 때 사용됨 */
 	struct list_elem d_elem;   /* 낮은 우선순위를 가진 스레드의 donations가 가리키는 list_elem  */
+	
+	int nice;
+	int recent_cpu;
 	/* Shared between thread.c and synch.c. */
 	struct list_elem elem;	   /* List element. */
 
@@ -154,6 +157,15 @@ bool cmp_priority(const struct list_elem *a, const struct list_elem *b, void *au
 void donate_priority(void);
 void remove_with_lock(struct lock *lock);
 void refresh_priority(void);
+
+void mlfqs_priority (struct thread *t);
+void mlfqs_recent_cpu (struct thread *t);
+void mlfqs_load_avg (void);
+void mlfqs_increment (void);
+// void mlfqs_recalc (void);
+
+void mlfqs_recalc_cpu (void);
+void mlfqs_recalc_pri (void);
 
 void do_iret(struct intr_frame *tf);
 

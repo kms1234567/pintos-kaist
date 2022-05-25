@@ -134,11 +134,19 @@ timer_interrupt (struct intr_frame *args UNUSED) {
 	ticks++;
 	thread_tick ();
 
-	// 수정
-	// 가장 빨리 깨어날 스레드 tick값 확인
-	// 깰 시간 지난 스레드 있으면 깨움
-	// 스레드의 wakeup이랑 현재시간 비교
-	// if (get_next_tick_to_awake() <= ticks)
+	if(thread_mlfqs){
+		mlfqs_increment();
+		if (ticks % 4 == 0){
+			mlfqs_recalc_pri();
+		
+			if (ticks % TIMER_FREQ == 0){
+				mlfqs_load_avg();
+				mlfqs_recalc_cpu();
+				
+			}
+		}
+	}
+	
 	thread_awake(ticks);
 }
 
